@@ -1,0 +1,119 @@
+{{!--
+  ******************************************************************************
+  * file           : mx_tcpp0203_template.h.hbs
+  * brief          : Code generation for the TCPP0203 part driver.
+  ******************************************************************************
+  * attention
+  *
+  * Copyright (c) 2026 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+~--}}
+/**
+  ******************************************************************************
+  * file           : mx_tcpp0203.h
+  * brief          : Code generation for the TCPP0203 part driver.
+  ******************************************************************************
+  * attention
+  *
+  * Copyright (c) {{#unless (eq 2026 (toInt (year)))}}2026-{{/unless}}{{year}} STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the mx_tcpp0203_license.md file
+  * in the same directory as the generated code.
+  * If no mx_tcpp0203_license.md file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+
+{{assign 'tcpp0203_instances' (@root.SWConfigurationAPI.getInstances  "STMicroelectronics::Board Part:STM32CubeMX2 Config:TCPP0203")~}}
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef MX_TCPP0203_H
+#define MX_TCPP0203_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Includes ------------------------------------------------------------------*/
+#include "tcpp0203.h"
+#include "mx_hal_def.h"
+
+/* Exported macro ------------------------------------------------------------*/
+{{#each @root.tcpp0203_instances}}
+{{assign 'ctx' (@root.SWConfigurationAPI.getSwInstanceConfiguration  this)~}}
+{{#with @root.ctx~}}
+/* Part Config ID */
+#define TCPP0203_{{@index}}                   {{@index}}
+
+{{#if (length info.labels)}}
+/* User-defined aliases for the part drivers instances IDs and getter functions */
+{{else}}
+/* No label has been defined for this part driver instance,
+ * so no alias is generated for TCPP0203_{{@index}} or mx_tcpp0203_{{@index}}_getobject(). */
+{{/if}}
+{{#each info.labels}}
+#define {{this}}                          TCPP0203_{{@../index}}
+{{/each}}
+{{#each info.labels}}
+#define {{lowercase this}}_getobject()    mx_tcpp0203_{{@../index}}_getobject()
+{{/each}}
+
+{{#if (eq info.interface 'ADC_I2C_EXTI')~}}
+{{#with @root.ctx.resourcesAllocation.adci2cExtiIoCfg~}}
+{{assign 'adcInstanceLowercase' (lowercase adcInstance.selection)~}}
+{{assign 'i2cHexAddress'  (dec2hex i2cAddress.address)~}}
+{{assign 'i2cInstanceLowercase' (lowercase i2cInstance.selection)~}}
+/* Part interface Properties */
+#define TCPP0203_{{@index}}_ADC_GETHANDLE      mx_{{helper_get_instance_name @root.adcInstanceLowercase}}_gethandle
+#define TCPP0203_{{@index}}_I2C_GETHANDLE      mx_{{@root.i2cInstanceLowercase}}_i2c_gethandle
+#define TCPP0203_{{@index}}_ADDRESS            0x{{@root.i2cHexAddress}}
+{{assign 'extiGpioPin' extiCfg.selection~}}
+{{log 'extiGpioPin' (toJSON @root.extiGpioPin)}}
+{{assign 'extiline' (@root.ExtiAPI.getExtiLine @root.extiGpioPin)~}}
+{{log 'extiline' (toJSON @root.extiline)}}
+{{assign 'extilineLowercase' (lowercase @root.extiline)~}}
+/* Part cable plugged pin detection Properties */
+#define TCPP0203_{{@index}}_EXTI_GETHANDLE     mx_gpio_default_{{@root.extilineLowercase}}_gethandle
+#define TCPP0203_{{@index}}_IRQ_LINE           {{@root.extiline}}_IRQn
+{{assign 'enbSelectionPin' enbCfg.selection~}}
+{{log 'enbSelectionPin' (toJSON @root.enbSelectionPin)}}
+{{assign 'enbGPIOSWInstanceId' (@root.SWConfigurationAPI.getBoundSwInstanceId enbCfg)~}}
+{{log 'enbGPIOSWInstanceId' (toJSON @root.enbGPIOSWInstanceId)}}
+{{assign 'enbGPIOcfg' (@root.SWConfigurationAPI.getPinConfiguration @root.enbGPIOSWInstanceId @root.enbSelectionPin)~}}
+{{assign 'enbPinData' (@root.pinoutAPI.getPinData @root.enbSelectionPin)~}}
+/* Part Enable Pin Properties */
+#define TCPP0203_{{@index}}_ENB_GPIO_PORT      HAL_GPIO{{@root.enbPinData.port}}
+#define TCPP0203_{{@index}}_ENB_PIN            HAL_GPIO_PIN_{{@root.enbPinData.index}}
+#define TCPP0203_{{@index}}_ENB_ACTIVE_STATE   {{#if (eq @root.enbGPIOcfg.basic.output_active_state 'SET')}}HAL_GPIO_PIN_SET{{else}}HAL_GPIO_PIN_RESET{{/if}}
+/* Part VBUS detection Properties */
+/* Value of VBUS voltage divider RA in Ohm */
+#define TCPP0203_{{@index}}_VBUS_RA          {{Ra}}
+/* Value of VBUS voltage divider RB in Ohm */
+#define TCPP0203_{{@index}}_VBUS_RB          {{Rb}}
+/* Value of VDD in mv */
+#define TCPP0203_{{@index}}_VDD              {{Vdd}}
+/* Value of current measure shunt resistor in mOhm */
+#define TCPP0203_{{@index}}_IANA_ISENSE_RS   {{Rs}}
+{{/with}}
+{{/if}}
+{{/with}}
+{{/each}}
+
+/* Functions to retrieve the part object */
+{{#each @root.tcpp0203_instances}}
+{{assign 'ctx' (@root.SWConfigurationAPI.getSwInstanceConfiguration  this)~}}
+tcpp0203_obj_t *mx_tcpp0203_{{@index}}_getobject(void);
+{{/each}}
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* MX_TCPP0203_H */

@@ -1,0 +1,221 @@
+{
+  "componentid": "::Board Part:STM32CubeMX2 Config:TCPP0203",
+  "type": "object",
+  "grammarVersion": "3.8.0",
+  "license": "Copyright (c) 2026 STMicroelectronics",
+  "properties": {
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "info": {
+          "title": "TCPP0203 configuration",
+          "type": "object",
+          "properties": {
+            "labels": {
+              "type": "array",
+              "title": "SW Label for parts objects",
+              "description": "Labels allow to create aliases inside mx_tcpp0203.h file for the object ID and object getter function. These aliases can be used on application side.",
+              "items": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 32,
+                "unique": "project",
+                "default": "",
+                "actions": [
+                  {
+                    "type": "error",
+                    "condition": "!/^[A-Za-z_][A-Za-z0-9_]*$/.test($value)",
+                    "message": "Name must be a valid C identifier: start with a letter or underscore, and contain only letters, digits, or underscores."
+                  }
+                ]
+              }
+            },
+            "interface": {
+              "title": "Interface selection",
+              "description": "Select the Interface to be configured",
+              "type": "string",
+              "oneOf": [
+                {
+                  "const": "ADC_I2C_EXTI",
+                  "title": "ADC_I2C_EXTI"
+                },
+                {
+                  "const": "Custom",
+                  "title": "Custom"
+                }
+              ],
+              "default": "ADC_I2C_EXTI"
+            }
+          }
+        },
+        "resourcesAllocation": {
+          "title": "STM32 resources allocation",
+          "type": "object",
+          "properties": {
+            "adci2cExtiIoCfg": {
+              "type": "object",
+              "description": "ADC I2C EXTI Interface and handles type-c cable detection using the EXTI driver.",
+              "title": "ADC I2C EXTI Interface Configuration",
+              "actions": [
+                {
+                  "type": "include",
+                  "condition": "$info.interface === 'ADC_I2C_EXTI'"
+                }
+              ],
+              "properties": {
+                "i2cInstance": {
+                  "type": "object",
+                  "title": "I2C Instance",
+                  "description": "The I2C peripheral must be configured first in the HAL I2C configuration panel",
+                  "objectType": "bind.peripheral.config",
+                  "criteria": {
+                    "peripheralType": [
+                      "i2c"
+                    ]
+                  },
+                  "actions": [
+                    {
+                      "type": "error",
+                      "condition": "!$resourcesAllocation.adci2cExtiIoCfg.i2cInstance?.selection",
+                      "message": "Please select an I2C instance configured in the Peripherals configuration panel."
+                    }
+                  ]
+                },
+                "i2cAddress": {
+                  "type": "object",
+                  "title": "I2C Address",
+                  "properties": {
+                    "I2C_ADD_PIN": {
+                      "type": "string",
+                      "title": "I2C_ADD PIN",
+                      "description": "Select the state of the I2C_ADD PIN",
+                      "oneOf": [
+                        {
+                          "title": "GND",
+                          "const": "TCPP0203_I2C_ADD_PIN_GND"
+                        },
+                        {
+                          "title": "VDD",
+                          "const": "TCPP0203_I2C_ADD_PIN_VDD"
+                        }
+                      ],
+                      "default": "TCPP0203_I2C_ADD_PIN_GND"
+                    },
+                    "address": {
+                      "type": "string",
+                      "title": "Calculated Address: ",
+                      "description": "This 7-bit address is calculated based on the I2C hardware PIN selection. Please be cautious about your hardware setup.",
+                      "actions": [
+                        {
+                          "type": "disable",
+                          "condition": "true"
+                        },
+                        {
+                          "type": "set",
+                          "condition": "$resourcesAllocation.adci2cExtiIoCfg.i2cAddress.I2C_ADD_PIN === 'TCPP0203_I2C_ADD_PIN_GND'",
+                          "attributes": {
+                            "const": "0x34"
+                          }
+                        },
+                        {
+                          "type": "set",
+                          "condition": "$resourcesAllocation.adci2cExtiIoCfg.i2cAddress.I2C_ADD_PIN === 'TCPP0203_I2C_ADD_PIN_VDD'",
+                          "attributes": {
+                            "const": "0x35"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "adcInstance": {
+                  "type": "object",
+                  "title": "ADC Instance",
+                  "description": "The ADC peripheral must be configured first in the HAL ADC configuration panel",
+                  "objectType": "bind.peripheral.config",
+                  "criteria": {
+                    "peripheralType": [
+                      "adc"
+                    ]
+                  },
+                  "actions": [
+                    {
+                      "type": "error",
+                      "condition": "!$resourcesAllocation.adci2cExtiIoCfg.adcInstance?.selection",
+                      "message": "Please select an ADC instance configured in the Peripheral configuration panel."
+                    }
+                  ]
+                },
+                "Ra": {
+                  "title": "VBUS voltage divider RA in Ohm",
+                  "type": "integer",
+                  "unit": "Ohm",
+                  "default": 330000
+                },
+                "Rb": {
+                  "title": "VBUS voltage divider RB in Ohm ",
+                  "type": "integer",
+                  "unit": "Ohm",
+                  "default": 49900
+                },
+                "Vdd": {
+                  "title": "Value of VDD in mV ",
+                  "type": "integer",
+                  "unit": "mV",
+                  "default": 3300
+                },
+                "Rs": {
+                  "title": "Current measure shunt resistor in mOhm ",
+                  "type": "integer",
+                  "unit": "mOhm",
+                  "default": 47
+                },
+                "enbCfg": {
+                  "title": "Enable PIN Configuration",
+                  "type": "object",
+                  "objectType": "bind.gpio.config",
+                  "description": "The GPIO PIN must be configured as an output in the HAL GPIO configuration panel",
+                  "pins": {
+                    "resetpin": {
+                      "title": "Enable PIN"
+                    }
+                  },
+                  "actions": [
+                    {
+                      "type": "error",
+                      "condition": "!$resourcesAllocation.adci2cExtiIoCfg.enbCfg?.selection",
+                      "message": "Please select a GPIO PIN configured as an output in the HAL GPIO configuration panel."
+                    }
+                  ]
+                },
+                "extiCfg": {
+                  "title": "EXTI Configuration",
+                  "type": "object",
+                  "objectType": "bind.gpio.config",
+                  "description": "The GPIO PIN must be configured as an external trigger (EXTI) in the HAL GPIO configuration panel",
+                  "pins": {
+                    "extipin": {
+                      "title": "EXTI PIN",
+                      "constraints": {
+                        "mode": {
+                          "const": "input"
+                        }
+                      }
+                    }
+                  },
+                  "actions": [
+                    {
+                      "type": "error",
+                      "condition": "!$resourcesAllocation.adci2cExtiIoCfg.extiCfg?.selection",
+                      "message": "Please select a GPIO PIN configured as an external trigger (EXTI) in the HAL GPIO configuration panel."
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

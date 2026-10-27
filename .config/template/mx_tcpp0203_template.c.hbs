@@ -1,0 +1,100 @@
+{{!--
+  ******************************************************************************
+  * file           : mx_tcpp0203_template.c.hbs
+  * brief          : Code generation for the TCPP0203 part driver.
+  ******************************************************************************
+  * attention
+  *
+  * Copyright (c) 2026 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+~--}}
+/**
+  ******************************************************************************
+  * file           : mx_tcpp0203.c
+  * brief          : Code generation for the TCPP0203 part driver.
+  ******************************************************************************
+  * attention
+  *
+  * Copyright (c) {{#unless (eq 2026 (toInt (year)))}}2026-{{/unless}}{{year}} STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the mx_tcpp0203_license.md file
+  * in the same directory as the generated code.
+  * If no mx_tcpp0203_license.md file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+
+{{assign 'tcpp0203_instances' (@root.SWConfigurationAPI.getInstances  "STMicroelectronics::Board Part:STM32CubeMX2 Config:TCPP0203")~}}
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+
+/* Includes ------------------------------------------------------------------*/
+#include "mx_tcpp0203.h"
+
+{{#each @root.tcpp0203_instances}}
+{{assign 'ctx' (@root.SWConfigurationAPI.getSwInstanceConfiguration this)~}}
+static tcpp0203_obj_t  tcpp0203_{{@index}}_obj;
+{{/each}}
+
+/**
+  * @brief initialize the IO layer.
+  * @param  pio      pointer to the part IO structure.
+  * @retval error status.
+  */
+int32_t tcpp0203_io_init(tcpp0203_io_t *pio)
+{
+  /* Part Status */
+  int ret = 0;
+
+  switch (pio->id)
+  {
+{{#each @root.tcpp0203_instances}}
+{{assign 'ctx' (@root.SWConfigurationAPI.getSwInstanceConfiguration this)~}}
+{{#with @root.ctx}}
+    case TCPP0203_{{@index}}:
+{{#if (eq info.interface 'ADC_I2C_EXTI')}}
+      pio->phadc        = TCPP0203_{{@index}}_ADC_GETHANDLE();
+      pio->phi2c        = TCPP0203_{{@index}}_I2C_GETHANDLE();
+      pio->addr         = (TCPP0203_{{@index}}_ADDRESS << 1);
+      pio->enb_port     = TCPP0203_{{@index}}_ENB_GPIO_PORT;
+      pio->enb_pin      = TCPP0203_{{@index}}_ENB_PIN;
+      pio->active_state = TCPP0203_{{@index}}_ENB_ACTIVE_STATE;
+      pio->phexti       = TCPP0203_{{@index}}_EXTI_GETHANDLE();
+      pio->irq_line     = TCPP0203_{{@index}}_IRQ_LINE;
+      pio->Ra           = TCPP0203_{{@index}}_VBUS_RA;
+      pio->Rb           = TCPP0203_{{@index}}_VBUS_RB;
+      pio->Rs           = TCPP0203_{{@index}}_IANA_ISENSE_RS;
+      pio->Vdd          = TCPP0203_{{@index}}_VDD;
+
+{{/if}}
+      break;
+
+{{/with}}
+{{/each}}
+    default:
+      /* Error -- Unknown ID */
+      ret = -1;
+      break;
+  }
+
+  return ret;
+}
+
+{{#each @root.tcpp0203_instances}}
+{{assign 'ctx' (@root.SWConfigurationAPI.getSwInstanceConfiguration this)~}}
+/**
+  * @brief Function to retrieve the Part object {{@index}}.
+  * @retval part object.
+  */
+tcpp0203_obj_t *mx_tcpp0203_{{@index}}_getobject(void)
+{
+  return &tcpp0203_{{@index}}_obj;
+}
+{{/each}}
